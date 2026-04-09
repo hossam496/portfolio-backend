@@ -45,6 +45,10 @@ app.use(express.json({ limit: '1mb' }));
 
 configureCloudinary();
 
+app.get("/", (req, res) => {
+  res.send("API is running 🚀");
+});
+
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true, cloudinary: Boolean(process.env.CLOUDINARY_CLOUD_NAME) });
 });

@@ -1,32 +1,19 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-// Ensure the connection is cached across warm lambda invocations
-let cached = global.mongoose;
+let isConnected = false;
 
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
-}
-
-export async function connectDB(uri) {
-  if (cached.conn) {
-    console.log('Using cached MongoDB connection');
-    return cached.conn;
-  }
-
-  if (!cached.promise) {
-    mongoose.set('strictQuery', true);
-    console.log('Establishing new MongoDB connection...');
-    cached.promise = mongoose.connect(uri).then((mongooseInstance) => {
-      console.log('MongoDB connected successfully');
-      return mongooseInstance;
-    });
-  }
+export const connectDB = async (uri) => {
+  if (isConnected) return;
 
   try {
-    cached.conn = await cached.promise;
-    return cached.conn;
+    await mongoose.connect(uri, {
+      serverSelectionTimeoutMS: 5000, // 🔥 يمنع التعليق
+    });
+
+    isConnected = true;
+    console.log("MongoDB Connected ✅");
   } catch (error) {
-    cached.promise = null;
+    console.error("Mongo Error ❌", error);
     throw error;
   }
-}
+};
