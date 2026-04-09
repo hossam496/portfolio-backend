@@ -1,5 +1,6 @@
 import Admin from '../models/Admin.js';
 import { signToken } from '../utils/generateToken.js';
+import bcrypt from 'bcryptjs';
 
 export async function login(req, res, next) {
   try {
@@ -12,25 +13,13 @@ export async function login(req, res, next) {
       return res.status(400).json({ message: "Email and password required" });
     }
 
-    // 🔥 Query محسّن
-    const admin = await Admin.findOne({ email })
-      .select('+passwordHash')
-      .lean(); // ⚡ أسرع
+    const admin = await Admin.findOne({ email }).select('+passwordHash');
 
     console.log("ADMIN:", admin);
 
     if (!admin) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
-
-    if (!admin.passwordHash) {
-      return res.status(503).json({
-        message: 'Admin has no password. Run seed script.',
-      });
-    }
-
-    // 🔥 بدل comparePassword method
-    const bcrypt = await import('bcryptjs');
 
     const valid = await bcrypt.compare(password, admin.passwordHash);
 
