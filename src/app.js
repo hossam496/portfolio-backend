@@ -14,17 +14,25 @@ dotenv.config();
 
 const app = express();
 
-const clientUrl = process.env.CLIENT_URL || 'https://portfolio-rouge-two-3mnljot19h.vercel.app/';
+const clientUrl = process.env.CLIENT_URL || 'https://portfolio-iota-opal-61.vercel.app';
 
 function allowOrigin(origin) {
   if (!origin) return true;
+  
+  // Clean trailing slashes for comparison
+  const cleanOrigin = origin.replace(/\/$/, "");
+  const cleanClientUrl = clientUrl.replace(/\/$/, "");
+  
+  if (cleanOrigin === cleanClientUrl) return true;
+  
   try {
     const { hostname } = new URL(origin);
     if (hostname === 'localhost' || hostname === '127.0.0.1') return true;
+    if (hostname.endsWith('vercel.app')) return true; // Allow any vercel deployment preview
   } catch {
     return false;
   }
-  return origin === clientUrl;
+  return false;
 }
 
 app.use(
